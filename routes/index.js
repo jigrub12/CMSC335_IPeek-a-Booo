@@ -8,7 +8,7 @@ module.exports = (db) => {
     const router = express.Router();
 
     router.get('/', (req, res) => {
-        res.render('pages/index');
+        res.render('index');
     });
 
     router.post('/search', async (req, res) => {
@@ -32,12 +32,49 @@ module.exports = (db) => {
             const searchHistory = { ipAddress, geolocation, threats, searchDate: new Date() };
             await db.collection(dbPlusCollection.collection).insertOne(searchHistory);
 
-            res.render('pages/result', { geolocation, threats });
+            // Generate HTML table
+            const resultTable = generateResultTable(geolocation, threats);
+
+            res.render('result', { table: resultTable });
         } catch (error) {
             console.error(error);
-            res.render('pages/result', { error: 'Failed to fetch data. Please try again.' });
+            res.render('result', { table: '<p class="error">Failed to fetch data. Please try again.</p>' });
         }
     });
 
     return router;
 };
+
+function generateResultTable(geolocation, threats) {
+    let table = `
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Geolocation Information</th>
+                    <th>Threat Information</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <p>IP: ${geolocation.ip}</p>
+                        <p>Country: ${geolocation.country_name}</p>
+                        <p>City: ${geolocation.city}</p>
+                        <p>Latitude: ${geolocation.latitude}</p>
+                        <p>Longitude: ${geolocation.longitude}</p>
+                    </td>
+                    <td>
+                        <p>IP Address: ${threats.ipAddress}</p>
+                        <p>Is Public: ${threats.isPublic}</p>
+                        <p>Confidence of Abuse: ${threats.abuseConfidenceScore}</p>
+                        <p>ISP: ${threats.isp}</p>
+                        <p>Domain: ${threats.domain}</p>
+                        <p>Usage Type: ${threats.usageType}</p>
+                        <p>Country Code: ${threats.countryCode}</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+    return table;
+}
