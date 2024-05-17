@@ -7,6 +7,9 @@ App Description: https://cmsc335-ipeek-a-booo.onrender.com/
 
 Allows users to enter IP Address through a form and gives info on its location and co-ordinates.
 
+
+The IPV4 Address format is a dotted quad or dotted decimal, is x.x.x.x
+
 There are additional pages, which show the most searched IP Addresses and a list of all IP Addresses searched.
 Youtube Video Link:
 
