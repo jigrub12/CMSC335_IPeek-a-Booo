@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Searched IP Addresses</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Top Searched IP Addresses</h1>
+    </header>
+    <main>
+    <div class="container">
+        <table border="1" style="width:100%; text-align:center;">
+            <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>Search Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% topSearched.forEach(item => { %>
+                    <tr>
+                        <td><%= item._id %></td>
+                        <td><%= item.count %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+    </main>
+
+    <footer>
+        <a href = '/'>HOME</a>
+        <p>&copy; 2024 - CMSC335 - IPeek-a-Boooooooo</p>
+    </footer>
+</body>
+</html>

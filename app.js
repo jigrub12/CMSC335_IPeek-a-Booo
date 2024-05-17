@@ -62,6 +62,8 @@ app.post('/search', async (req, res) => {
         // Calculate the distance between the user's location and the searched IP location
         const distance = calcDistanceBetweenIPs(userLat, userLon, targetLat, targetLon);
 
+        // const searchedIP = {${}};
+
         const searchHistory = { ipAddress, geolocation, distance, searchDate: new Date() };
         await client.db(dbPlusCollection.db).collection(dbPlusCollection.collection).insertOne(searchHistory);
 
@@ -85,6 +87,23 @@ function calcDistanceBetweenIPs(lat1, lon1, lat2, lon2) {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in km
 }
+
+app.get('/history', async (req, res) => {
+    const client = new MongoClient(uri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverApi: ServerApiVersion.v1
+    });
+    try {
+        await client.connect();
+        const history = await client.db(dbPlusCollection.db).collection(dbPlusCollection.collection).find({}).toArray();
+        const resultTable = generateHistoryTable(history);
+        res.render('history', { table: resultTable });
+    } catch (error) {
+        console.error("Error fetching history", error);
+        res.render('history', { table: '<p class="error">Failed to fetch search history.</p>' });
+    }
+});
 
 function generateResultTable(geolocation, distance) {
 
@@ -124,6 +143,61 @@ function generateResultTable(geolocation, distance) {
         </table>
     `;
 }
+
+function generateHistoryTable(history) {
+    return `
+        <table border="1" style="width:100%; text-align:center;">
+            <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>Country</th>
+                    <th>City</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${history.map(item => `
+                    <tr>
+                        <td>${item.ipAddress}</td>
+                        <td>${item.geolocation.country_name}</td>
+                        <td>${item.geolocation.city}</td>
+                        <td>${item.geolocation.latitude}</td>
+                        <td>${item.geolocation.longitude}</td>
+                        <td>${new Date(item.searchDate).toISOString().split('T')[0]}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+app.get('/top-searched-ips', async (req, res) => {
+    const client = new MongoClient(uri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverApi: ServerApiVersion.v1
+    });
+
+    try {
+        await client.connect();
+        const locationCollection = client.db(dbPlusCollection.db).collection(dbPlusCollection.collection);
+
+        const topSearched = await locationCollection.aggregate([
+            { $group: { _id: "$ipAddress", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 }
+        ]).toArray();
+
+        res.render('top-searched-ips', { topSearched });
+    } catch (error) {
+        console.error("Error fetching top searched IP addresses", error);
+        res.status(500).send('Failed to fetch top searched IP addresses');
+    } finally {
+        await client.close();
+    }
+});
 
 
 app.listen(portNum, () => {

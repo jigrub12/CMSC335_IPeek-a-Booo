@@ -65,3 +65,19 @@ button:hover {
 .error {
     color: red;
 }
+
+
+table {
+    margin: 0 auto;
+    width: 80%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+th {
+    background-color: #f4f4f4;
+}
