@@ -59,10 +59,8 @@ app.post('/search', async (req, res) => {
             throw new Error("Invalid geolocation data received.");
         }
 
-        // Calculate the distance between the user's location and the searched IP location
+        // this is what I call to calculate the distance between the user's location and the searched IP location
         const distance = calcDistanceBetweenIPs(userLat, userLon, targetLat, targetLon);
-
-        // const searchedIP = {${}};
 
         const searchHistory = { ipAddress, geolocation, distance, searchDate: new Date() };
         await client.db(dbPlusCollection.db).collection(dbPlusCollection.collection).insertOne(searchHistory);
