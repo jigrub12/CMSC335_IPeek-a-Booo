@@ -18,12 +18,6 @@ const viewsPath = path.resolve(__dirname, 'Views');
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
 
-// // Debugging log
-// console.log("Views directory path: ", viewsPath);
-// fs.readdirSync(viewsPath).forEach(file => {
-//     console.log("File in views: ", file);
-// });
-
 function getClientIP(req, res, next) {
     const forwarded = req.headers['x-forwarded-for'];
     const ip = forwarded ? forwarded.split(/, /)[0] : req.connection.remoteAddress;
@@ -38,6 +32,8 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
+
+//this is my post functionality where I fetch the ip geolocation api to get more information on the IP Address that the user entered.
 app.post('/search', async (req, res) => {
     const { ipAddress } = req.body;
 
@@ -70,11 +66,14 @@ app.post('/search', async (req, res) => {
         // this is what I call to calculate the distance between the user's location and the searched IP location
         const distance = calcDistanceBetweenIPs(userLat, userLon, targetLat, targetLon);
 
+        //creating a search history object to update into the database
         const searchHistory = { ipAddress, geolocation, distance, searchDate: new Date() };
         await client.db(dbPlusCollection.db).collection(dbPlusCollection.collection).insertOne(searchHistory);
 
+        //here we call the the table generating method using the geolocation object and distance
         const resultTable = generateResultTable(geolocation, distance);      
         res.render('afterSearch', { table: resultTable });
+
     } catch (error) {
         console.error("Ip Address error bruh", error);
         res.render('afterSearch', { table: '<p class="error">Failed to fetch data. Please try again.</p>' });
@@ -82,7 +81,11 @@ app.post('/search', async (req, res) => {
         await client.close();
     }
 });
-// Function to calculate distance between two coordinates
+
+// Function to calculate distance between two coordinates, this is what we'll use to calculate the distance between the current user on the website
+//and the ip address mentioned.
+//However, note by Jigar: if you host the website locally, it will default to google's IP Address your IP address, since the distance functionality
+//is only for once the website renders.
 function calcDistanceBetweenIPs(lat1, lon1, lat2, lon2) {
     const R = 6371; // Radius of the Earth in km
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -94,6 +97,8 @@ function calcDistanceBetweenIPs(lat1, lon1, lat2, lon2) {
     return R * c; // Distance in km
 }
 
+
+//get call to the search history page. fetches previously searched ips from the db and shows.
 app.get('/history', async (req, res) => {
     const client = new MongoClient(uri, {
         useNewUrlParser: true,
@@ -103,7 +108,7 @@ app.get('/history', async (req, res) => {
     try {
         await client.connect();
         const history = await client.db(dbPlusCollection.db).collection(dbPlusCollection.collection).find({}).toArray();
-        const resultTable = generateHistoryTable(history);
+        const resultTable = generateHistoryTable(history);//calling the search history generating table function here.
         res.render('history', { table: resultTable });
     } catch (error) {
         console.error("Error fetching history", error);
@@ -127,7 +132,8 @@ function generateResultTable(geolocation, distance) {
                 </tr>
                 <tr>
                     <td>Country</td>
-                    <td>${geolocation.country_name} <img src="${geolocation.country_flag}" alt="Country Flag" style="width:20px;height:15px;"></td>
+                    <td>${geolocation.country_name} 
+                    <img src="${geolocation.country_flag}" alt="Country Flag" style="width:20px;height:15px;"></td>
                 </tr>
                 <tr>
                     <td>City</td>
@@ -179,6 +185,9 @@ function generateHistoryTable(history) {
     `;
 }
 
+
+//this is our get call to the top searched ip addresses from the db/site. this fetches the db and filters out info to depict the occurence of top
+//10 searched IPs.
 app.get('/top-searched-ips', async (req, res) => {
     const client = new MongoClient(uri, {
         useNewUrlParser: true,
