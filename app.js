@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const fs = require('fs');
 
 const app = express();
 const portNum = process.env.PORT;
@@ -18,6 +17,8 @@ const viewsPath = path.resolve(__dirname, 'Views');
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
 
+
+//this is my function to get the user's ip when they are on my website. it will default to google's ip if testing locally, therefore distance would be affected.
 function getClientIP(req, res, next) {
     const forwarded = req.headers['x-forwarded-for'];
     const ip = forwarded ? forwarded.split(/, /)[0] : req.connection.remoteAddress;
