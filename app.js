@@ -34,10 +34,20 @@ app.post('/search', async (req, res) => {
         const geoResponse = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${process.env.IP_GEOLOCATION_API_KEY}&ip=${ipAddress}`);
         const geolocation = await geoResponse.json();
 
-        const searchHistory = { ipAddress, geolocation,searchDate: new Date() };
+        // const abusedIP = await fetch('https://api.abuseipdb.com/api/v2/check?ipAddress=${ipAddress}', {
+        //     headers:{
+        //         'Key': process.env.ABUSEIPDB_API_KEY,
+        //         'Accept': 'application/json'
+        //     }
+        // });
+        // const abusedIPDATA = await abusedIP.json();
+        // const threats = abusedIPDATA.data;
+
+
+        const searchHistory = { ipAddress, geolocation, threats, searchDate: new Date() };
         await client.db(dbPlusCollection.db).collection(dbPlusCollection.collection).insertOne(searchHistory);
 
-        const resultTable = generateResultTable(geolocation);      
+        const resultTable = generateResultTable(geolocation, threats);      
         res.render('afterSearch', { table: resultTable });
     } catch (error) {
         console.error("Ip Address error bruh", error);
@@ -47,27 +57,40 @@ app.post('/search', async (req, res) => {
     }
 });
 
-function generateResultTable(geolocation) {
+function generateResultTable(geolocation, threats) {
     return `
-        <table border="1" style="width:100%; text-align:left;">
+        <table border="1" style="width:100%; text-align:center;">
             <thead>
                 <tr>
-                    <th>Geolocation Information</th>
+                    <th colspan = "2">Geolocation Information</th>
                 </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>
-                    <p>IP: ${geolocation.ip}</p>
-                    <p>Country: ${geolocation.country_name}</p>
-                    <p>City: ${geolocation.city}</p>
-                    <p>Latitude: ${geolocation.latitude}</p>
-                    <p>Longitude: ${geolocation.longitude}</p>
-                </td>
+                <tr>
+                    <td>IP</td>
+                    <td>${geolocation.ip}</td>
+                </tr>
+                <tr>
+                    <td>Country</td>
+                    <td>${geolocation.country_name} <img src="${geolocation.country_flag}" alt="Country Flag" style="width:20px;height:15px;"></td>
+                </tr>
+                <tr>
+                    <td>City</td>
+                    <td>${geolocation.city}</td>
+                </tr>
+                <tr>
+                    <td>Latitude</td>
+                    <td>${geolocation.latitude}</td>
+                </tr>
+                <tr>
+                    <td>Longitude</td>
+                    <td>${geolocation.longitude}</td>
+                </tr>
             </tbody>
         </table>
     `;
 }
+
 
 app.listen(portNum, () => {
     console.log(`Server running on port ${portNum}`);
