@@ -18,11 +18,11 @@ const viewsPath = path.resolve(__dirname, 'views');
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
 
-// Debugging log
-console.log("Views directory path: ", viewsPath);
-fs.readdirSync(viewsPath).forEach(file => {
-    console.log("File in views: ", file);
-});
+// // Debugging log
+// console.log("Views directory path: ", viewsPath);
+// fs.readdirSync(viewsPath).forEach(file => {
+//     console.log("File in views: ", file);
+// });
 
 function getClientIP(req, res, next) {
     const forwarded = req.headers['x-forwarded-for'];
