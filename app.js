@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const fs = require('fs');
 
 const app = express();
 const portNum = process.env.PORT;
@@ -13,8 +14,15 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.set('views', path.resolve(__dirname, 'views'));
+const viewsPath = path.resolve(__dirname, 'views');
+app.set('views', viewsPath);
 app.set('view engine', 'ejs');
+
+// Debugging log
+console.log("Views directory path: ", viewsPath);
+fs.readdirSync(viewsPath).forEach(file => {
+    console.log("File in views: ", file);
+});
 
 function getClientIP(req, res, next) {
     const forwarded = req.headers['x-forwarded-for'];
