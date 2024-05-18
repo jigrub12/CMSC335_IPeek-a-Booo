@@ -99,7 +99,7 @@ function calcDistanceBetweenIPs(lat1, lon1, lat2, lon2) {
 }
 
 
-//get call to the search history page. fetches previously searched ips from the db and shows.
+//get call to the search history page fetches previously searched ips from the db and shows.
 app.get('/history', async (req, res) => {
     const client = new MongoClient(uri, {
         useNewUrlParser: true,
