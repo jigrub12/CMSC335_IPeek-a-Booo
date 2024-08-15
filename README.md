@@ -2,7 +2,7 @@
 
 **Submitted by** : Jigar Bhavsar (dir id : jigarb12)
 
-**Group Members**: Jigar Bhavsar (jigarb12), Praatyush Gupta (pgupta43)
+**Group Members**: Jigar Bhavsar (jigarb12)
 
 **App Description**: [https://cmsc335-ipeek-a-booo.onrender.com/](https://cmsc335-ipeek-a-booo.onrender.com/)
 
